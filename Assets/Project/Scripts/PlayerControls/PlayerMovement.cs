@@ -7,19 +7,15 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 moveInput;
     public float moveSpeed = 4f;
 
+    private Animator animator;
+
     private void Awake()
     {
         controls = new PlayerControls();
+        animator = GetComponent<Animator>();
 
-        controls.Player.Move.performed += ctx =>
-        {
-            moveInput = ctx.ReadValue<Vector2>();
-        };
-
-        controls.Player.Move.canceled += ctx =>
-        {
-            moveInput = Vector2.zero;
-        };
+        controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
     }
 
     private void OnEnable()
@@ -36,5 +32,14 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector3 delta = new Vector3(moveInput.x, moveInput.y, 0f);
         transform.position += delta * moveSpeed * Time.deltaTime;
+
+        bool isMoving = delta.sqrMagnitude > 0.001f;
+        animator.SetBool("IsMoving", isMoving);
+
+        if (isMoving)
+        {
+            animator.SetFloat("MoveX", moveInput.x);
+            animator.SetFloat("MoveY", moveInput.y);
+        }
     }
 }
